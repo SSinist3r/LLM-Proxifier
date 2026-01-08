@@ -37,6 +37,10 @@ COPY src/ ./src/
 # Create directories for logs and oauth credentials
 RUN mkdir -p logs oauth_creds
 
+# Copy and set up entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose the default port
 EXPOSE 8000
 
@@ -46,4 +50,5 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONPATH=/app/src
 
 # Default command - runs proxy with the correct PYTHONPATH
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["python", "src/proxy_app/main.py", "--port", "8000"]
