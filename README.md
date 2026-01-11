@@ -812,6 +812,17 @@ docker compose logs -f
 **Manual Docker Run:**
 
 ```bash
+# Simple: Mount entire directory
+docker run -d \
+  --name llm-api-proxy \
+  --restart unless-stopped \
+  -p 8000:8000 \
+  -v $(pwd):/app \
+  -e SKIP_OAUTH_INIT_CHECK=true \
+  -e PYTHONUNBUFFERED=1 \
+  ghcr.io/mirrowel/llm-api-key-proxy:latest
+
+# Or selective mounts for more control:
 docker run -d \
   --name llm-api-proxy \
   --restart unless-stopped \
@@ -825,6 +836,8 @@ docker run -d \
   ghcr.io/mirrowel/llm-api-key-proxy:latest
 ```
 
+> **Note:** The `docker-compose.yml` uses `./:/app` to mount the entire project directory. This overlays the container's `/app` directory, so ensure all required source files exist on the host (clone the repo first). For production deployments with just the image, use the selective mounts approach.
+
 **Development with Local Build:**
 
 ```bash
@@ -834,9 +847,11 @@ docker compose -f docker-compose.dev.yml up -d --build
 
 **Volume Mounts:**
 
+The `docker-compose.yml` mounts the entire project directory (`./:/app`) for simplicity. Key paths used by the application:
+
 | Path             | Purpose                                |
 | ---------------- | -------------------------------------- |
-| `.env`           | Configuration and API keys (read-only) |
+| `.env`           | Configuration and API keys             |
 | `oauth_creds/`   | OAuth credential files (persistent)    |
 | `logs/`          | Request logs and detailed logging      |
 | `key_usage.json` | Usage statistics persistence           |
